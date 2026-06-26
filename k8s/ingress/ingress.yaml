@@ -1,0 +1,55 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: micromart-ingress
+  namespace: micromart
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: micromart.local
+      http:
+        paths:
+          - path: /auth(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 8001
+          - path: /catalog(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: catalog-service
+                port:
+                  number: 8002
+          - path: /cart(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cart-service
+                port:
+                  number: 8003
+          - path: /order(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 8004
+          - path: /payment(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: payment-service
+                port:
+                  number: 8005
+          - path: /notification(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: notification-service
+                port:
+                  number: 8006

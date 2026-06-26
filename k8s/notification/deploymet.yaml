@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: micromart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: mlmakhdoomi/micromart-notification:v1
+          ports:
+            - containerPort: 8006
+          env:
+            - name: RABBITMQ_URL
+              value: "amqp://micromart:micromart123@rabbitmq:5672/"

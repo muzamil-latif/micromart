@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-service
+  namespace: micromart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-service
+  template:
+    metadata:
+      labels:
+        app: catalog-service
+    spec:
+      containers:
+        - name: catalog-service
+          image: mlmakhdoomi/micromart-catalog:v1
+          ports:
+            - containerPort: 8002
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://micromart:micromart123@postgres:5432/micromart"
+            - name: REDIS_URL
+              value: "redis://redis:6379"

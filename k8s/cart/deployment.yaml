@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  namespace: micromart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+        - name: cart-service
+          image: mlmakhdoomi/micromart-cart:v1
+          ports:
+            - containerPort: 8003
+          env:
+            - name: REDIS_URL
+              value: "redis://redis:6379"
+            - name: CATALOG_SERVICE_URL
+              value: "http://catalog-service:8002"

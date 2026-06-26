@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: micromart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: order-service
+          image: mlmakhdoomi/micromart-order:v1
+          ports:
+            - containerPort: 8004
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://micromart:micromart123@postgres:5432/micromart"
+            - name: CART_SERVICE_URL
+              value: "http://cart-service:8003"
+            - name: PAYMENT_SERVICE_URL
+              value: "http://payment-service:8005"
+            - name: CATALOG_SERVICE_URL
+              value: "http://catalog-service:8002"
+            - name: RABBITMQ_URL
+              value: "amqp://micromart:micromart123@rabbitmq:5672/"
