@@ -33,7 +33,7 @@ Interactive docs at **http://localhost:8004/docs**
 ## API Reference
 
 ### `POST /orders`
-Place an order for a user. Runs the full placement saga.
+Place an order for a user. Runs the full placement sagaii.
 
 **Request body**
 ```json
