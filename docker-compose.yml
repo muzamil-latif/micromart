@@ -1,0 +1,115 @@
+services:
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: micromart
+      POSTGRES_PASSWORD: micromart123
+      POSTGRES_DB: micromart
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U micromart"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: micromart
+      RABBITMQ_DEFAULT_PASS: micromart123
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  auth-service:
+    build: ./services/auth-service
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: postgresql://micromart:micromart123@postgres:5432/micromart
+      JWT_SECRET: supersecretjwtkey123
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  catalog-service:
+    build: ./services/catalog-service
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: postgresql://micromart:micromart123@postgres:5432/micromart
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  cart-service:
+    build: ./services/cart-service
+    ports:
+      - "8003:8003"
+    environment:
+      REDIS_URL: redis://redis:6379
+      CATALOG_SERVICE_URL: http://catalog-service:8002
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  order-service:
+    build: ./services/order-service
+    ports:
+      - "8004:8004"
+    environment:
+      DATABASE_URL: postgresql://micromart:micromart123@postgres:5432/micromart
+      CART_SERVICE_URL: http://cart-service:8003
+      PAYMENT_SERVICE_URL: http://payment-service:8005
+      CATALOG_SERVICE_URL: http://catalog-service:8002
+      RABBITMQ_URL: amqp://micromart:micromart123@rabbitmq:5672/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  payment-service:
+    build: ./services/payment-service
+    ports:
+      - "8005:8005"
+    environment:
+      DATABASE_URL: postgresql://micromart:micromart123@postgres:5432/micromart
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  notification-service:
+    build: ./services/notification-service
+    ports:
+      - "8006:8006"
+    environment:
+      RABBITMQ_URL: amqp://micromart:micromart123@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
